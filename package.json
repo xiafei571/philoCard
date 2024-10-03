@@ -1,0 +1,23 @@
+{
+  "name": "philocard",
+  "version": "1.0.0",
+  "description": "A philosophy card application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "next": "^12.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "typescript": "^4.5.0"
+  },
+  "license": "MIT"
+}
