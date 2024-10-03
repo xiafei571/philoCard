@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import fs from 'fs';
 import path from 'path';
 import styles from '../styles/Home.module.css';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 export default function Home({ quotes, images }) {
   const [currentQuote, setCurrentQuote] = useState(null);
@@ -17,16 +17,26 @@ export default function Home({ quotes, images }) {
     });
   }, []);
 
+  const generateHash = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16); // Convert to positive hexadecimal
+  };
+
   const generateNewCard = () => {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     const randomImage = images[Math.floor(Math.random() * images.length)];
-    const uuid = uuidv4();
+    const hash = generateHash(`${randomImage}${randomQuote.id}`);
     setCurrentQuote(randomQuote);
     setCurrentImage(randomImage);
     setIsFlipped(false);
     setGeneratedRecords(prev => {
       const newRecord = {
-        id: uuid,
+        id: hash,
         imageSource: randomImage,
         quoteId: randomQuote.id,
         timestamp: new Date().toISOString()
@@ -49,10 +59,24 @@ export default function Home({ quotes, images }) {
       const cardFront = cardRef.current.querySelector(`.${styles.cardFront}`);
       if (!cardFront) return;
 
-      const canvas = await html2canvas(cardFront);
+      const canvas = await html2canvas(cardFront, {
+        backgroundColor: null,
+      });
+      
+      const borderedCanvas = document.createElement('canvas');
+      const ctx = borderedCanvas.getContext('2d');
+      const borderWidth = 10; // 将边框宽度从 20 减少到 10
+      borderedCanvas.width = canvas.width + borderWidth * 2;
+      borderedCanvas.height = canvas.height + borderWidth * 2;
+      
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, borderedCanvas.width, borderedCanvas.height);
+      
+      ctx.drawImage(canvas, borderWidth, borderWidth);
+
       const link = document.createElement('a');
       link.download = `philocard_${generatedRecords[0].id}.png`;
-      link.href = canvas.toDataURL();
+      link.href = borderedCanvas.toDataURL();
       link.click();
     } catch (error) {
       console.error('Error generating image:', error);
