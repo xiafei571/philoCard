@@ -65,7 +65,7 @@ export default function Home({ quotes, images }) {
       
       const borderedCanvas = document.createElement('canvas');
       const ctx = borderedCanvas.getContext('2d');
-      const borderWidth = 10; // 将边框宽度从 20 减少到 10
+      const borderWidth = 10; 
       borderedCanvas.width = canvas.width + borderWidth * 2;
       borderedCanvas.height = canvas.height + borderWidth * 2;
       
@@ -106,8 +106,10 @@ export default function Home({ quotes, images }) {
                 </div>
               </div>
               <div className={styles.cardBack}>
-                <h3>Background:</h3>
-                <p>{currentQuote?.background || 'No background available'}</p>
+                <div className={styles.cardBackContent}>
+                  <h3>Background:</h3>
+                  <p>{currentQuote?.background || 'No background available'}</p>
+                </div>
               </div>
             </div>
           </div>
