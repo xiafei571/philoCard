@@ -45,6 +45,13 @@
   cursor: pointer;
   border-radius: 20px;
   overflow: hidden;
+  transition: filter 0.5s ease, transform 0.5s ease, opacity 0.5s ease;
+  --blur: 0px;
+  --scale: 1;
+  --opacity: 1;
+  filter: blur(var(--blur));
+  transform: scale(var(--scale));
+  opacity: var(--opacity);
 }
 
 .placeholder {
@@ -173,4 +180,16 @@
 .button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.iosHint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.card.loading {
+  --blur: 10px;
+  --scale: 0.95;
+  --opacity: 0.7;
 }

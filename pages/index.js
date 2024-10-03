@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import fs from 'fs';
 import path from 'path';
 import styles from '../styles/Home.module.css';
-import crypto from 'crypto';
 
 export default function Home({ quotes, images }) {
   const [currentQuote, setCurrentQuote] = useState(null);
@@ -10,6 +9,8 @@ export default function Home({ quotes, images }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [generatedRecords, setGeneratedRecords] = useState([]);
   const [html2canvas, setHtml2canvas] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     import('html2canvas').then(module => {
@@ -17,34 +18,60 @@ export default function Home({ quotes, images }) {
     });
   }, []);
 
-  const generateHash = (str) => {
+  const generateHash = useCallback((str) => {
     let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
+    const randomSalt = Math.random().toString(36).substring(7);
+    const saltedStr = str + randomSalt;
+    for (let i = 0; i < saltedStr.length; i++) {
+      const char = saltedStr.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    return Math.abs(hash).toString(16); // Convert to positive hexadecimal
-  };
+    return Math.abs(hash).toString(16);
+  }, []);
 
-  const generateNewCard = () => {
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const randomImage = images[Math.floor(Math.random() * images.length)];
-    const hash = generateHash(`${randomImage}${randomQuote.id}`);
-    setCurrentQuote(randomQuote);
-    setCurrentImage(randomImage);
-    setIsFlipped(false);
-    setGeneratedRecords(prev => {
-      const newRecord = {
-        id: hash,
-        imageSource: randomImage,
-        quoteId: randomQuote.id,
-        timestamp: new Date().toISOString()
-      };
-      const updatedRecords = [newRecord, ...prev].slice(0, 5);
-      return updatedRecords;
-    });
-  };
+  const generateNewCard = useCallback(() => {
+    setIsLoading(true);
+    const cardElement = cardRef.current;
+    
+    if (cardElement) {
+      cardElement.style.setProperty('--blur', '10px');
+      cardElement.style.setProperty('--scale', '0.95');
+      cardElement.style.setProperty('--opacity', '0.7');
+    }
+
+    setTimeout(() => {
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      const hash = generateHash(`${randomImage}${randomQuote.id}`);
+      
+      setCurrentQuote(randomQuote);
+      setCurrentImage(randomImage);
+      setIsFlipped(false);
+      setGeneratedRecords(prevRecords => {
+        const newRecord = {
+          id: hash,
+          imageSource: randomImage,
+          quoteId: randomQuote.id,
+          timestamp: new Date().toISOString()
+        };
+        
+        const filteredRecords = prevRecords.filter(record => record.id !== hash);
+        const updatedRecords = [newRecord, ...filteredRecords].slice(0, 5);
+        
+        return updatedRecords;
+      });
+      
+      requestAnimationFrame(() => {
+        if (cardElement) {
+          cardElement.style.setProperty('--blur', '0px');
+          cardElement.style.setProperty('--scale', '1');
+          cardElement.style.setProperty('--opacity', '1');
+        }
+        setIsLoading(false);
+      });
+    }, 500);
+  }, [quotes, images, generateHash]);
 
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);
@@ -74,27 +101,66 @@ export default function Home({ quotes, images }) {
       
       ctx.drawImage(canvas, borderWidth, borderWidth);
 
-      const link = document.createElement('a');
-      link.download = `philocard_${generatedRecords[0].id}.png`;
-      link.href = borderedCanvas.toDataURL();
-      link.click();
+      const blob = await new Promise(resolve => borderedCanvas.toBlob(resolve, 'image/png'));
+      const fileName = `philocard_${generatedRecords[0].id}.png`;
+
+      if (isMobile && navigator.share) {
+        try {
+          await navigator.share({
+            files: [new File([blob], fileName, { type: 'image/png' })],
+            title: 'PhiloCard',
+            text: 'Check out this philosophical quote!',
+          });
+        } catch (error) {
+          fallbackDownload(blob, fileName);
+        }
+      } else {
+        fallbackDownload(blob, fileName);
+      }
     } catch (error) {
-      console.error('Error generating image:', error);
+      // Handle error silently or show a user-friendly message
     }
   };
+
+  const fallbackDownload = (blob, fileName) => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = window.navigator.userAgent;
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      setIsMobile(mobile);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
       <div className={styles.topSection}>
-        <button className={styles.button} onClick={generateNewCard}>Next</button>
-        <button className={styles.button} onClick={handleDownload} disabled={!currentQuote || !currentImage}>Download</button>
+        <button className={styles.button} onClick={generateNewCard} disabled={isLoading}>
+          {isLoading ? 'Loading...' : 'Next'}
+        </button>
+        <button className={styles.button} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
+          {isMobile ? 'Share' : 'Download'}
+        </button>
       </div>
       
       <div className={styles.middleSection}>
         {currentQuote && currentImage ? (
           <div 
             ref={cardRef}
-            className={`${styles.card} ${isFlipped ? styles.flipped : ''}`}
+            className={`${styles.card} ${isFlipped ? styles.flipped : ''} ${isLoading ? styles.loading : ''}`}
             onClick={handleCardClick}
           >
             <div className={styles.cardInner}>
@@ -123,13 +189,19 @@ export default function Home({ quotes, images }) {
       <div className={styles.bottomSection}>
         <h3>Generated Records:</h3>
         <ul className={styles.recordsList}>
-          {generatedRecords.map((record) => (
+          {generatedRecords.slice(0, 5).map((record) => (
             <li key={record.id}>
               Image: {record.imageSource}, Quote ID: {record.quoteId}, Time: {record.timestamp}
             </li>
           ))}
         </ul>
       </div>
+      
+      {isMobile && (
+        <p className={styles.iosHint}>
+          On mobile devices, tap "Share" to save or share the image.
+        </p>
+      )}
     </div>
   );
 }
