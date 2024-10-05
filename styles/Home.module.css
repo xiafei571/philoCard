@@ -6,6 +6,7 @@
   min-height: 100vh;
   padding: 20px;
   text-align: center;
+  padding-bottom: 60px; /* 根据 footer 的高度调整 */
 }
 
 .topSection {
@@ -192,4 +193,46 @@
   --blur: 10px;
   --scale: 0.95;
   --opacity: 0.7;
+}
+
+/* 添加 footer 样式 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center; /* 居中对齐 */
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+
+.footerLink {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  padding: 5px 10px;
+  margin: 0 10px; /* 添加左右间距 */
+}
+
+.footerLink:hover {
+  color: #4CAF50;
+}
+
+.activeLink {
+  font-weight: bold;
+  color: #4CAF50; /* 或者任何你想要的高亮颜色 */
+}
+
+/* 手机端样式 */
+@media (max-width: 768px) {
+  .footer {
+    justify-content: space-around; /* 在手机端平铺 */
+  }
+
+  .footerLink {
+    margin: 0; /* 移除左右间距 */
+  }
 }

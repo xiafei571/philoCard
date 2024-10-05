@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import fs from 'fs';
 import path from 'path';
 import styles from '../styles/Home.module.css';
+import Link from 'next/link';
 
 export default function Home({ quotes, images }) {
   const [currentQuote, setCurrentQuote] = useState(null);
@@ -202,6 +203,19 @@ export default function Home({ quotes, images }) {
           On mobile devices, tap "Share" to save or share the image.
         </p>
       )}
+      
+      {/* 在最后添加 footer */}
+      <footer className={styles.footer}>
+        <Link href="/">
+          <a className={styles.footerLink}>Home</a>
+        </Link>
+        <Link href="/mycard">
+          <a className={styles.footerLink}>My Card</a>
+        </Link>
+        <Link href="/setting">
+          <a className={styles.footerLink}>Setting</a>
+        </Link>
+      </footer>
     </div>
   );
 }
