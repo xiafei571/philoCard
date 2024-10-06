@@ -86,7 +86,21 @@ export default function Home() {
       const blob = await new Promise(resolve => borderedCanvas.toBlob(resolve, 'image/png'));
       const fileName = `philocard_${Date.now()}.png`;
 
-      fallbackDownload(blob, fileName);
+      if (isMobile && navigator.share) {
+        try {
+          const file = new File([blob], fileName, { type: 'image/png' });
+          await navigator.share({
+            files: [file],
+            title: 'PhiloCard',
+            text: 'Check out this philosophical quote!',
+          });
+        } catch (error) {
+          console.error('Error sharing:', error);
+          fallbackDownload(blob, fileName);
+        }
+      } else {
+        fallbackDownload(blob, fileName);
+      }
     } catch (error) {
       console.error('Error in handleDownload:', error);
     }
@@ -122,7 +136,7 @@ export default function Home() {
           {isLoading ? 'Loading...' : 'Next'}
         </button>
         <button className={styles.button} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
-          {isMobile ? 'Share' : 'Download'}
+          {isMobile ? 'Share/Save' : 'Download'}
         </button>
       </div>
       
@@ -158,7 +172,7 @@ export default function Home() {
       
       {isMobile && (
         <p className={styles.iosHint}>
-          On mobile devices, tap "Share" to save or share the image.
+          On mobile devices, tap "Share/Save" to share or save the image to your device.
         </p>
       )}
     </div>
