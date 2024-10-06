@@ -1,37 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import fs from 'fs';
-import path from 'path';
 import styles from '../styles/Home.module.css';
 import Link from 'next/link';
+import Image from 'next/image';
+import { storage } from '../lib/firebase';
+import { ref, getDownloadURL } from "firebase/storage";
 
-export default function Home({ quotes, images }) {
+export default function Home() {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [generatedRecords, setGeneratedRecords] = useState([]);
   const [html2canvas, setHtml2canvas] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    import('html2canvas').then(module => {
-      setHtml2canvas(() => module.default);
-    });
-  }, []);
-
-  const generateHash = useCallback((str) => {
-    let hash = 0;
-    const randomSalt = Math.random().toString(36).substring(7);
-    const saltedStr = str + randomSalt;
-    for (let i = 0; i < saltedStr.length; i++) {
-      const char = saltedStr.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash).toString(16);
-  }, []);
-
-  const generateNewCard = useCallback(() => {
+  const generateNewCard = useCallback(async () => {
     setIsLoading(true);
     const cardElement = cardRef.current;
     
@@ -41,28 +23,25 @@ export default function Home({ quotes, images }) {
       cardElement.style.setProperty('--opacity', '0.7');
     }
 
-    setTimeout(() => {
-      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-      const randomImage = images[Math.floor(Math.random() * images.length)];
-      const hash = generateHash(`${randomImage}${randomQuote.id}`);
-      
-      setCurrentQuote(randomQuote);
-      setCurrentImage(randomImage);
-      setIsFlipped(false);
-      setGeneratedRecords(prevRecords => {
-        const newRecord = {
-          id: hash,
-          imageSource: randomImage,
-          quoteId: randomQuote.id,
-          timestamp: new Date().toISOString()
-        };
-        
-        const filteredRecords = prevRecords.filter(record => record.id !== hash);
-        const updatedRecords = [newRecord, ...filteredRecords].slice(0, 5);
-        
-        return updatedRecords;
+    try {
+      const response = await fetch('/api/generate-card');
+      const data = await response.json();
+
+      setCurrentQuote({
+        quote: data.quote.quote,
+        author: data.quote.author,
+        background: data.quote.background
       });
-      
+
+      // 使用 Firebase Storage 获取图片 URL
+      const imageRef = ref(storage, data.src_img);
+      const imageUrl = await getDownloadURL(imageRef);
+      setCurrentImage(imageUrl);
+
+      setIsFlipped(false);
+    } catch (error) {
+      console.error('Error generating new card:', error);
+    } finally {
       requestAnimationFrame(() => {
         if (cardElement) {
           cardElement.style.setProperty('--blur', '0px');
@@ -71,8 +50,8 @@ export default function Home({ quotes, images }) {
         }
         setIsLoading(false);
       });
-    }, 500);
-  }, [quotes, images, generateHash]);
+    }
+  }, []);
 
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);
@@ -81,7 +60,7 @@ export default function Home({ quotes, images }) {
   const cardRef = useRef(null);
 
   const handleDownload = async () => {
-    if (!cardRef.current || !html2canvas || !generatedRecords.length) return;
+    if (!cardRef.current || !html2canvas) return;
 
     try {
       const cardFront = cardRef.current.querySelector(`.${styles.cardFront}`);
@@ -103,7 +82,7 @@ export default function Home({ quotes, images }) {
       ctx.drawImage(canvas, borderWidth, borderWidth);
 
       const blob = await new Promise(resolve => borderedCanvas.toBlob(resolve, 'image/png'));
-      const fileName = `philocard_${generatedRecords[0].id}.png`;
+      const fileName = `philocard_${Date.now()}.png`;
 
       if (isMobile && navigator.share) {
         try {
@@ -166,7 +145,7 @@ export default function Home({ quotes, images }) {
           >
             <div className={styles.cardInner}>
               <div className={styles.cardFront}>
-                <img src={`/images/src/${currentImage}`} alt="Philosophy" />
+                <img src={currentImage} alt="Philosophy" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                 <div className={styles.quoteOverlay}>
                   <p>{currentQuote.quote}</p>
                   <p>- {currentQuote.author}</p>
@@ -185,17 +164,6 @@ export default function Home({ quotes, images }) {
             Click 'Next' to generate a card
           </div>
         )}
-      </div>
-      
-      <div className={styles.bottomSection}>
-        <h3>Generated Records:</h3>
-        <ul className={styles.recordsList}>
-          {generatedRecords.slice(0, 5).map((record) => (
-            <li key={record.id}>
-              Image: {record.imageSource}, Quote ID: {record.quoteId}, Time: {record.timestamp}
-            </li>
-          ))}
-        </ul>
       </div>
       
       {isMobile && (
@@ -218,23 +186,4 @@ export default function Home({ quotes, images }) {
       </footer>
     </div>
   );
-}
-
-export async function getServerSideProps() {
-  const quotesPath = path.join(process.cwd(), 'philosophyText', 'quotes.json');
-  const quotesData = fs.readFileSync(quotesPath, 'utf8');
-  const quotes = JSON.parse(quotesData);
-
-  const imagesDirectory = path.join(process.cwd(), 'public', 'images', 'src');
-  const images = fs.readdirSync(imagesDirectory).filter(file => 
-    !file.startsWith('.') && 
-    (file.endsWith('.jpg') || file.endsWith('.jpeg') || file.endsWith('.png') || file.endsWith('.gif'))
-  );
-
-  return {
-    props: {
-      quotes,
-      images,
-    },
-  };
 }

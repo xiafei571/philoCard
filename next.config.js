@@ -16,4 +16,19 @@ module.exports = {
     }
     return config;
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,
+      },
+      {
+        source: '/image/:path*',
+        destination: 'https://storage.googleapis.com/:path*',
+      },
+    ]
+  },
+  images: {
+    domains: ['storage.googleapis.com'],
+  },
 };
