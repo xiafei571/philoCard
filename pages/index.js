@@ -171,19 +171,6 @@ export default function Home() {
           On mobile devices, tap "Share" to save or share the image.
         </p>
       )}
-      
-      {/* 在最后添加 footer */}
-      <footer className={styles.footer}>
-        <Link href="/">
-          <a className={styles.footerLink}>Home</a>
-        </Link>
-        <Link href="/mycard">
-          <a className={styles.footerLink}>My Card</a>
-        </Link>
-        <Link href="/setting">
-          <a className={styles.footerLink}>Setting</a>
-        </Link>
-      </footer>
     </div>
   );
 }
