@@ -4,12 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { storage } from '../lib/firebase';
 import { ref, getDownloadURL } from "firebase/storage";
+// 导入 html2canvas
+import html2canvas from 'html2canvas';
 
 export default function Home() {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [html2canvas, setHtml2canvas] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,45 +61,34 @@ export default function Home() {
   const cardRef = useRef(null);
 
   const handleDownload = async () => {
-    if (!cardRef.current || !html2canvas) return;
+    if (!cardRef.current) return;
 
     try {
       const cardFront = cardRef.current.querySelector(`.${styles.cardFront}`);
       if (!cardFront) return;
 
       const canvas = await html2canvas(cardFront, {
-        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true,
+        scale: 2
       });
-      
+
       const borderedCanvas = document.createElement('canvas');
-      const ctx = borderedCanvas.getContext('2d');
-      const borderWidth = 10; 
+      const borderedCtx = borderedCanvas.getContext('2d');
+      const borderWidth = 20;
       borderedCanvas.width = canvas.width + borderWidth * 2;
       borderedCanvas.height = canvas.height + borderWidth * 2;
-      
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, borderedCanvas.width, borderedCanvas.height);
-      
-      ctx.drawImage(canvas, borderWidth, borderWidth);
+
+      borderedCtx.fillStyle = 'white';
+      borderedCtx.fillRect(0, 0, borderedCanvas.width, borderedCanvas.height);
+      borderedCtx.drawImage(canvas, borderWidth, borderWidth);
 
       const blob = await new Promise(resolve => borderedCanvas.toBlob(resolve, 'image/png'));
       const fileName = `philocard_${Date.now()}.png`;
 
-      if (isMobile && navigator.share) {
-        try {
-          await navigator.share({
-            files: [new File([blob], fileName, { type: 'image/png' })],
-            title: 'PhiloCard',
-            text: 'Check out this philosophical quote!',
-          });
-        } catch (error) {
-          fallbackDownload(blob, fileName);
-        }
-      } else {
-        fallbackDownload(blob, fileName);
-      }
+      fallbackDownload(blob, fileName);
     } catch (error) {
-      // Handle error silently or show a user-friendly message
+      console.error('Error in handleDownload:', error);
     }
   };
 
