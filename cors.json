@@ -1,6 +1,6 @@
 [
   {
-    "origin": ["https://philo-card.vercel.app", "http://localhost:3000"],
+    "origin": ["https://*.vercel.app", "http://localhost:3000"],
     "method": ["GET", "POST", "PUT", "DELETE"],
     "maxAgeSeconds": 3600
   }
