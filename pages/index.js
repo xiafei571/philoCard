@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from '../styles/Home.module.css';
+// 导入空心和实心星星图标
+import { FaRedo, FaDownload, FaShare, FaStar, FaRegStar } from 'react-icons/fa';
 import Link from 'next/link';
 import Image from 'next/image';
-import { storage } from '../lib/firebase';
+import { storage, auth } from '../lib/firebase'; // 直接从 firebase.js 导入 auth
+// 移除 getUserInfo 的导入
 import { ref, getDownloadURL } from "firebase/storage";
 // 导入 html2canvas
 import html2canvas from 'html2canvas';
+import { formatDate } from '../lib/clientUtils'; // 改为
 
 export default function Home() {
   const [currentQuote, setCurrentQuote] = useState(null);
@@ -13,6 +17,9 @@ export default function Home() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastGeneratedData, setLastGeneratedData] = useState(null);
+  const [isCached, setIsCached] = useState(false);
+  // 移除 userInfo 状态
 
   const generateNewCard = useCallback(async () => {
     setIsLoading(true);
@@ -40,6 +47,8 @@ export default function Home() {
       setCurrentImage(imageUrl);
 
       setIsFlipped(false);
+      setLastGeneratedData(data);
+      setIsCached(false); // 重置收藏状态
     } catch (error) {
       console.error('Error generating new card:', error);
     } finally {
@@ -95,14 +104,14 @@ export default function Home() {
             text: 'Check out this philosophical quote!',
           });
         } catch (error) {
-          console.error('Error sharing:', error);
           fallbackDownload(blob, fileName);
         }
       } else {
         fallbackDownload(blob, fileName);
       }
     } catch (error) {
-      console.error('Error in handleDownload:', error);
+      // 如果需要，可以在这里添加一个用户友好的错误提示
+      console.error('Failed to download image');
     }
   };
 
@@ -112,6 +121,23 @@ export default function Home() {
     link.download = fileName;
     link.click();
     URL.revokeObjectURL(link.href);
+  };
+
+  const handleFavorite = () => {
+    console.log('Last generated data:', lastGeneratedData);
+    const user = auth.currentUser;
+    if (user) {
+      console.log('User info:', {
+        Email: user.email,
+        'User ID': user.uid,
+        'Email Verified': user.emailVerified ? 'Yes' : 'No',
+        'Account Created': formatDate(user.metadata.creationTime),
+        'Last Sign In': formatDate(user.metadata.lastSignInTime)
+      });
+    } else {
+      console.log('User not logged in');
+    }
+    setIsCached(!isCached); // 切换收藏状态
   };
 
   useEffect(() => {
@@ -132,11 +158,18 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <div className={styles.topSection}>
-        <button className={styles.button} onClick={generateNewCard} disabled={isLoading}>
-          {isLoading ? 'Loading...' : 'Next'}
+        <button className={`${styles.iconButton} ${styles.nextButton}`} onClick={generateNewCard} disabled={isLoading}>
+          {isLoading ? <FaRedo className={styles.spinning} /> : <FaRedo />}
         </button>
-        <button className={styles.button} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
-          {isMobile ? 'Share/Save' : 'Download'}
+        <button className={`${styles.iconButton} ${styles.downloadButton}`} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
+          {isMobile ? <FaShare /> : <FaDownload />}
+        </button>
+        <button 
+          className={`${styles.iconButton} ${styles.favoriteButton}`} 
+          onClick={handleFavorite} 
+          disabled={!lastGeneratedData}
+        >
+          {isCached ? <FaStar /> : <FaRegStar />}
         </button>
       </div>
       

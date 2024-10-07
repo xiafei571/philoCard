@@ -295,3 +295,79 @@
 }
 
 /* 保留其他样式 */
+
+.iconButton {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: transparent; /* 改为透明背景 */
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s;
+  margin: 0 10px;
+}
+
+.iconButton:hover {
+  transform: scale(1.1);
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconButton svg {
+  width: 24px;
+  height: 24px;
+  color: #333; /* 保持图标颜色为深灰色 */
+}
+
+.nextButton {
+  background-color: transparent; /* 移除背景色 */
+}
+
+.nextButton svg {
+  color: #4CAF50; /* 将图标颜色改为绿色 */
+}
+
+.downloadButton {
+  background-color: transparent; /* 移除背景色 */
+}
+
+.downloadButton svg {
+  color: #2196F3; /* 将图标颜色改为蓝色 */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* 可能需要调整 topSection 的样式 */
+.topSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* 在文件末尾添加以下样式 */
+
+.favoriteButton {
+  background-color: transparent;
+}
+
+.favoriteButton svg {
+  color: #FFD700; /* 金色，适用于两种状态 */
+}
+
+/* 可以为未收藏状态添加特殊样式 */
+.favoriteButton svg[data-icon="star-regular"] {
+  opacity: 0.7; /* 使未收藏状态的星星稍微透明一些 */
+}
