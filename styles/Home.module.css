@@ -1,47 +1,42 @@
 .container {
+  height: calc(100vh - 20px); /* 50px 为估计的地址栏高度 */
+  padding: 0; /* 移除内边距，避免不必要的空白 */
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: space-between;
-  height: 100vh; /* 改为固定高度 */
-  padding: 20px 20px 0; /* 移除底部内边距 */
-  text-align: center;
-  overflow: hidden; /* 防止滚动 */
+  overflow: hidden; /* 防止出现滚动条 */
 }
 
-.topSection {
-  width: 100%;
-  flex: 0 0 auto; /* 不伸缩，保持自身大小 */
+.mainContainer {
+  height: 80%; /* 主内容区域占用 94% 高度 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; /* 防止出现滚动条 */
+}
+
+.iconSection {
+  height: 10%; /* 调整 icon 区域为 mainContainer 的 10% 高度 */
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0; /* 移除不必要的外边距 */
 }
 
 .middleSection {
-  width: 100%;
-  flex: 1; /* 占用剩余空间 */
+  height: 90%; /* 调整中间区域为 mainContainer 的 90% 高度 */
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: auto; /* 如果内容过多，允许这部分滚动 */
-}
-
-.bottomSection {
-  width: 100%;
-  height: 25vh; /* 增加高度 */
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: center; /* 垂直居中卡片 */
+  overflow: hidden; /* 防止滚动条 */
 }
 
 .card {
-  width: 33.75vh; /* 9:16 比例，但更小 */
-  height: 60vh;
-  max-width: 300px; /* 减小最大宽度 */
-  max-height: 533px; /* 减小最大高度 */
+  width: 39.375vh; /* 9:16 比例，但更小 */
+  height: 70vh;
+  max-width: 450px; /* 减小最大宽度 */
+  max-height: 800px; /* 减小最大高度 */
   perspective: 1000px;
   cursor: pointer;
   border-radius: 20px;
@@ -56,10 +51,10 @@
 }
 
 .placeholder {
-  width: 33.75vh;
-  height: 60vh;
-  max-width: 300px;
-  max-height: 533px;
+  width: 39.375vh;
+  height: 70vh;
+  max-width: 450px;
+  max-height: 800px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,7 +103,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px; /* 添加圆角，使图片适应卡片的圆角 */
+  border-radius: 5px; /* 添加圆角，使图片适应卡片的圆角 */
 }
 
 .cardBack {
@@ -183,12 +178,6 @@
   cursor: not-allowed;
 }
 
-.iosHint {
-  font-size: 12px;
-  color: #666;
-  margin-top: 5px;
-}
-
 .card.loading {
   --blur: 10px;
   --scale: 0.95;
@@ -198,6 +187,7 @@
 /* 添加 footer 样式 */
 .footer {
   width: 100%;
+  height: 6%;
   flex: 0 0 auto; /* 不伸缩，保持自身大小 */
   display: flex;
   justify-content: center; /* 居中对齐 */
@@ -307,7 +297,7 @@
   align-items: center;
   cursor: pointer;
   transition: transform 0.3s;
-  margin: 0 10px;
+  margin: 0 5px;
 }
 
 .iconButton:hover {
@@ -348,16 +338,7 @@
 
 .spinning {
   animation: spin 1s linear infinite;
-}
-
-/* 可能需要调整 topSection 的样式 */
-.topSection {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-/* 在文件末尾添加以下样式 */
+}/* 在文件末尾添加以下样式 */
 
 .favoriteButton {
   background-color: transparent;

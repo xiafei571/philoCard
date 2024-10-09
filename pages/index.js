@@ -156,22 +156,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.topSection}>
-        <button className={`${styles.iconButton} ${styles.nextButton}`} onClick={generateNewCard} disabled={isLoading}>
-          {isLoading ? <FaRedo className={styles.spinning} /> : <FaRedo />}
-        </button>
-        <button className={`${styles.iconButton} ${styles.downloadButton}`} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
-          {isMobile ? <FaShare /> : <FaDownload />}
-        </button>
-        <button 
-          className={`${styles.iconButton} ${styles.favoriteButton}`} 
-          onClick={handleFavorite} 
-          disabled={!lastGeneratedData}
-        >
-          {isCached ? <FaStar /> : <FaRegStar />}
-        </button>
-      </div>
+    <div className={styles.mainContainer}>
       
       <div className={styles.middleSection}>
         {currentQuote && currentImage ? (
@@ -201,6 +186,22 @@ export default function Home() {
             Click 'Next' to generate a card
           </div>
         )}
+      </div>
+
+      <div className={styles.iconSection}>
+        <button className={`${styles.iconButton} ${styles.nextButton}`} onClick={generateNewCard} disabled={isLoading}>
+          {isLoading ? <FaRedo className={styles.spinning} /> : <FaRedo />}
+        </button>
+        <button className={`${styles.iconButton} ${styles.downloadButton}`} onClick={handleDownload} disabled={!currentQuote || !currentImage}>
+          {isMobile ? <FaShare /> : <FaDownload />}
+        </button>
+        <button 
+          className={`${styles.iconButton} ${styles.favoriteButton}`} 
+          onClick={handleFavorite} 
+          disabled={!lastGeneratedData}
+        >
+          {isCached ? <FaStar /> : <FaRegStar />}
+        </button>
       </div>
     </div>
   );

@@ -28,3 +28,30 @@ yarn start
 - React
 - CSS Modules
 - html2canvas for image generation
+
+```
+.container
+├── .mainContainer
+│   ├── .middleSection
+│   │   └── .card 或 .placeholder
+│   │       ├── .cardInner
+│   │       │   ├── .cardFront
+│   │       │   │   ├── img
+│   │       │   │   └── .quoteOverlay
+│   │       │   └── .cardBack
+│   │       │       └── .cardBackContent
+│   │       │           ├── h3
+│   │       │           └── p
+│   │       └── (动态类：.flipped, .loading)
+│   └── .iconSection
+│       ├── .iconButton.nextButton
+│       │   └── FaRedo 或 FaRedo.spinning
+│       ├── .iconButton.downloadButton
+│       │   └── FaShare 或 FaDownload
+│       └── .iconButton.favoriteButton
+│           └── FaStar 或 FaRegStar
+└── .footer
+    ├── .footerLink (Home)
+    ├── .footerLink (My Card)
+    └── .footerLink (Setting)
+```
