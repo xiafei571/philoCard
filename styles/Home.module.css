@@ -41,7 +41,7 @@
   cursor: pointer;
   border-radius: 20px;
   overflow: hidden;
-  transition: filter 1s ease, transform 1s ease, opacity 1s ease;
+  transition: filter 1.5s ease, transform 1.5s ease, opacity 1.5s ease;
   --blur: 0px;
   --scale: 1;
   --opacity: 1;
