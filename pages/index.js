@@ -84,7 +84,7 @@ export default function Home() {
 
       const borderedCanvas = document.createElement('canvas');
       const borderedCtx = borderedCanvas.getContext('2d');
-      const borderWidth = 20;
+      const borderWidth = 10;
       borderedCanvas.width = canvas.width + borderWidth * 2;
       borderedCanvas.height = canvas.height + borderWidth * 2;
 
@@ -110,7 +110,7 @@ export default function Home() {
         fallbackDownload(blob, fileName);
       }
     } catch (error) {
-      // 如果需要，可以在这里添加一个用户友好的错误提示
+      // 如果需要,可以在这里添加一个用户友好的错误提示
       console.error('Failed to download image');
     }
   };
