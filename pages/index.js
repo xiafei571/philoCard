@@ -202,12 +202,6 @@ export default function Home() {
           </div>
         )}
       </div>
-      
-      {isMobile && (
-        <p className={styles.iosHint}>
-          On mobile devices, tap "Share/Save" to share or save the image to your device.
-        </p>
-      )}
     </div>
   );
 }
