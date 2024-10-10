@@ -55,3 +55,8 @@ yarn start
     ├── .footerLink (My Card)
     └── .footerLink (Setting)
 ```
+
+## CORS
+```bash
+gsutil cors set cors.json gs://philo-card.appspot.com
+```
